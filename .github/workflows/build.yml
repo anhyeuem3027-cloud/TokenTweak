@@ -1,3 +1,4 @@
+
 name: Build iOS Tweak
 
 on:
@@ -17,21 +18,74 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git make clang perl curl xz-utils
+          sudo apt-get install -y \
+            build-essential \
+            git \
+            make \
+            clang \
+            perl \
+            curl \
+            xz-utils \
+            unzip \
+            fakeroot \
+            libio-compress-lzma-perl
 
       - name: Install Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
           echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
 
+      - name: Install iOS Toolchain
+        run: |
+          curl -fL \
+            https://github.com/sbingner/llvm-project/releases/latest/download/linux-ios-arm64e-clang-toolchain.tar.lzma \
+            -o toolchain.tar.lzma
+
+          mkdir -p "$THEOS/toolchain/linux/iphone"
+
+          TMP=$(mktemp -d)
+          tar -xvf toolchain.tar.lzma -C "$TMP"
+
+          cp -a "$TMP"/ios-arm64e-clang-toolchain/. \
+            "$THEOS/toolchain/linux/iphone/"
+
+          rm -rf "$TMP" toolchain.tar.lzma
+
+          test -x "$THEOS/toolchain/linux/iphone/bin/clang"
+
+      - name: Install iOS SDK
+        run: |
+          mkdir -p "$THEOS/sdks"
+
+          curl -fL \
+            https://github.com/theos/sdks/archive/refs/heads/master.zip \
+            -o sdks.zip
+
+          TMP=$(mktemp -d)
+          unzip -q sdks.zip -d "$TMP"
+
+          cp -a "$TMP"/sdks-master/*.sdk "$THEOS/sdks/"
+
+          rm -rf "$TMP" sdks.zip
+
+          ls -la "$THEOS/sdks"
+
+      - name: Verify build environment
+        run: |
+          echo "THEOS=$THEOS"
+          "$THEOS/toolchain/linux/iphone/bin/clang" --version
+          ls "$THEOS/sdks"
+
       - name: Build Tweak
         run: |
+          make clean
           make package
 
       - name: Upload dylib
         uses: actions/upload-artifact@v4
         with:
           name: ios-tweak-build
-          path: .theos/_/Library/MobileSubstrate/DynamicLibraries/*.dylib
+          path: |
+            .theos/_/Library/MobileSubstrate/DynamicLibraries/*.dylib
           if-no-files-found: error
           retention-days: 7
