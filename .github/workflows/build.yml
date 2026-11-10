@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -28,7 +28,9 @@ jobs:
             xz-utils \
             unzip \
             fakeroot \
-            libio-compress-lzma-perl
+            libio-compress-lzma-perl \
+            libtinfo5 \
+            libncurses5
 
       - name: Install Theos
         run: |
@@ -51,8 +53,6 @@ jobs:
 
           rm -rf "$TMP" toolchain.tar.lzma
 
-          test -x "$THEOS/toolchain/linux/iphone/bin/clang"
-
       - name: Install iOS SDK
         run: |
           mkdir -p "$THEOS/sdks"
@@ -68,13 +68,12 @@ jobs:
 
           rm -rf "$TMP" sdks.zip
 
-          ls -la "$THEOS/sdks"
-
       - name: Verify build environment
         run: |
-          echo "THEOS=$THEOS"
+          set -e
+          test -x "$THEOS/toolchain/linux/iphone/bin/clang"
+          test -n "$(find "$THEOS/sdks" -maxdepth 1 -name '*.sdk' -print -quit)"
           "$THEOS/toolchain/linux/iphone/bin/clang" --version
-          ls "$THEOS/sdks"
 
       - name: Build Tweak
         run: |
@@ -85,7 +84,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-tweak-build
-          path: |
-            .theos/_/Library/MobileSubstrate/DynamicLibraries/*.dylib
+          path: .theos/_/Library/MobileSubstrate/DynamicLibraries/*.dylib
           if-no-files-found: error
           retention-days: 7
