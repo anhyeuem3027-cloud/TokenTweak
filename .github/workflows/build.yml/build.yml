@@ -19,3 +19,4 @@ jobs:
          with:
            name: TokenTweak-dylib
            path: .theos/_/Library/MobileSubstrate/DynamicLibraries/TokenTweak.dylib
+
