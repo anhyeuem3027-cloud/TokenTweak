@@ -1,0 +1,9 @@
+
+Package: com.thang.tokentweak
+Name: TokenTweak
+Version: 1.0.0
+Architecture: iphoneos-arm64
+Description: Token authentication tweak for a personal iOS application
+Maintainer: Thang
+Author: Thang
+Section: Tweaks
