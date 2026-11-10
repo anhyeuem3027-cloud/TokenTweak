@@ -5,7 +5,7 @@
 
 static NSString * const kSavedLicenseKey = @"SavedLicenseKey";
 static NSString * const kAPIEndpoint =
-    @"https://ioscrack.pro/api/check_key.php";
+    @"https://ioscrack.pro/licence/api/check_key.php";
 
 static NSString * const kBundleIdentifier = @"fc.vn1";
 
