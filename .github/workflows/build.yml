@@ -1,31 +1,38 @@
 name: Build iOS Tweak
 
-on: [push]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
 
-      - name: Install Dependencies
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git make
+          sudo apt-get install -y build-essential git make clang perl curl xz-utils
 
-      - name: Setup Theos
+      - name: Install Theos
         run: |
-          git clone --recursive https://github.com/theos/theos.git $HOME/theos
-          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+          git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
+          echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
 
-      - name: Build Package
+      - name: Build Tweak package
         run: |
-          export THEOS=$HOME/theos
           make package
 
-      - name: Upload Artifact
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: TokenTweak-dylib
-          path: .theos/_/Library/MobileSubstrate/DynamicLibraries/TokenTweak.dylib
+          name: ios-tweak-build
+          path: |
+            .theos/_/Library/MobileSubstrate/DynamicLibraries/*.dylib
+          if-no-files-found: error
+          retention-days: 7
