@@ -1,0 +1,21 @@
+name: Build iOS Tweak
+
+on: [push]
+
+jobs:
+  build:
+     runs-on: macos-latest
+     container:
+       image: gabriel12l/theos:latest
+     steps:
+       - name: Checkout Code
+         uses: actions/checkout@v3
+
+       - name: Build Package
+         run: make package
+
+       - name: Upload Artifact
+         uses: actions/upload-artifact@v3
+         with:
+           name: TokenTweak-dylib
+           path: .theos/_/Library/MobileSubstrate/DynamicLibraries/TokenTweak.dylib
