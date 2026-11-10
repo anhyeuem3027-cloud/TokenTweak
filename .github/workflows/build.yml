@@ -1,10 +1,10 @@
 name: Build iOS Tweak
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,15 +24,14 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
           echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
 
-      - name: Build Tweak package
+      - name: Build Tweak
         run: |
           make package
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+      - name: Upload dylib
+        uses: actions/upload-artifact@v4
         with:
           name: ios-tweak-build
-          path: |
-            .theos/_/Library/MobileSubstrate/DynamicLibraries/*.dylib
+          path: .theos/_/Library/MobileSubstrate/DynamicLibraries/*.dylib
           if-no-files-found: error
           retention-days: 7
