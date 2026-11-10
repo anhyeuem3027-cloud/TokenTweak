@@ -1,6 +1,5 @@
-ARCHS = arm64 arm64e
-TARGET = iphone:clang:latest:latest
-INSTALL_TARGET_PROCESSES = YourApp
+ARCHS = arm64
+TARGET = iphone:clang:latest:16.5
 
 include $(THEOS)/makefiles/common.mk
 
