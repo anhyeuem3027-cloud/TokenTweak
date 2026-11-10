@@ -5,14 +5,22 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: gabriel12l/theos:latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential git make
+
+      - name: Setup Theos
+        run: |
+          git clone --recursive https://github.com/theos/theos.git $HOME/theos
+          echo "THEOS=$HOME/theos" >> $GITHUB_ENV
+
       - name: Build Package
-        run: make package
+        run: |
+          export THEOS=$HOME/theos
+          make package
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
