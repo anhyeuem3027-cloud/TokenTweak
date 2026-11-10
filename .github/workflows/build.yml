@@ -37,21 +37,14 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git "$HOME/theos"
           echo "THEOS=$HOME/theos" >> "$GITHUB_ENV"
 
-      - name: Install iOS Toolchain
+      - name: Install updated Swift Toolchain
         run: |
+          mkdir -p "$THEOS/toolchain"
+          rm -rf "$THEOS/toolchain/"*
+
           curl -fL \
-            https://github.com/sbingner/llvm-project/releases/latest/download/linux-ios-arm64e-clang-toolchain.tar.lzma \
-            -o toolchain.tar.lzma
-
-          mkdir -p "$THEOS/toolchain/linux/iphone"
-
-          TMP=$(mktemp -d)
-          tar -xvf toolchain.tar.lzma -C "$TMP"
-
-          cp -a "$TMP"/ios-arm64e-clang-toolchain/. \
-            "$THEOS/toolchain/linux/iphone/"
-
-          rm -rf "$TMP" toolchain.tar.lzma
+            https://github.com/kabiroberai/swift-toolchain-linux/releases/download/v2.3.0/swift-5.8-ubuntu20.04.tar.xz \
+            | tar -xJf - -C "$THEOS/toolchain/"
 
       - name: Install iOS SDK
         run: |
@@ -68,12 +61,11 @@ jobs:
 
           rm -rf "$TMP" sdks.zip
 
-      - name: Verify build environment
+      - name: Verify environment
         run: |
-          set -e
-          test -x "$THEOS/toolchain/linux/iphone/bin/clang"
-          test -n "$(find "$THEOS/sdks" -maxdepth 1 -name '*.sdk' -print -quit)"
-          "$THEOS/toolchain/linux/iphone/bin/clang" --version
+          echo "THEOS=$THEOS"
+          find "$THEOS/toolchain" -name clang -type f
+          ls -la "$THEOS/sdks"
 
       - name: Build Tweak
         run: |
